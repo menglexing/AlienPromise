@@ -4,30 +4,30 @@ function ready (fn) {
     var context = null
     var args = []
 
+    onready.state = 0
+
     var complete = function () {
+        if (isReady) return;
+
         isReady = true
         onready.state = 1
+        context = this
+        args = Array.prototype.slice.call(arguments)
 
-        while (callbacks.length) {
-            callbacks.shift().apply(context, args)
-        }
+        setTimeout(function(){
+            while (callbacks.length) {
+                callbacks.shift().apply(context, args)
+            }
+        }, 0)
     }
 
     if (typeof fn === 'function') {
         fn(function(){
-            context = this
-            args = arguments
-
-            setTimeout(complete, 0)
+            complete.apply(this, arguments)
         })
     } else {
-        context = this
-        args = arguments
-
-        setTimeout(complete, 0)
+        complete.apply(this, arguments)
     }
-
-    onready.state = 0
 
     function onready (callback) {
         if (typeof callback === 'function') {
